@@ -1,8 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
 import { randomBytes } from "crypto";
 
-const prisma = new PrismaClient();
+import prisma from "@/data/prisma/instance";
 
 export default async function handler(
   req: NextApiRequest,

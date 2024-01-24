@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcryptjs";
 
 import prisma from "@/data/prisma/instance";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export default async function handler(
   req: NextApiRequest,
@@ -21,8 +22,15 @@ export default async function handler(
     const user = await prisma.user.create({
       data: { username, password: hashedPassword },
     });
+
     res.status(201).json({ message: "User created", userId: user.id });
   } catch (error) {
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2002" && Array.isArray(error.meta?.target) && error.meta?.target.includes("username")) {
+        return res.status(409).json({ error: "User with this username already exists" });
+      }
+    }
+
     res.status(500).json({ error: "Error creating user" });
   }
 }

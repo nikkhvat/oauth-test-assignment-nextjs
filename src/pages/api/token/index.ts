@@ -32,8 +32,6 @@ export default async function handler(
     }
   }
 
-  console.log(code, client_id, client_secret);
-
   const client = await prisma.client.findUnique({
     where: { clientId: client_id },
   });

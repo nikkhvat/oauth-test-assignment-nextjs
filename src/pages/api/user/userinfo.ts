@@ -15,8 +15,6 @@ export default async function handler(
 
   const authHeader = req.headers['authorization'];
 
-  console.log(authHeader);
-
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {

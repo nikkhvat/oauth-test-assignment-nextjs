@@ -25,7 +25,7 @@ POST `http://localhost:3000/api/auth/register`
 ```json
 {
   "message": "User created",
-  "userId": 1
+  "userId": 8
 }
 ```
 
@@ -44,18 +44,20 @@ POST `http://localhost:3000/api/client/register`
 
 ```json
 {
-    "clientId": "104636c2e3f6f5b47979d283f864c743",
-    "clientSecret": "481a692f4d39c430508b18e1c67a43ef9df07ad42a9100cc0e064f2e250493c4"
+    "clientId": "cbb8051f-3897-42e3-b909-f8f56e7941a9",
+    "clientSecret": "6b7bdd89-9b24-4d2c-b422-4507ae84fd87"
 }
 ```
 
 3. Переходим на authorize
 
-GET `http://localhost:3000/api/auth/authorize?response_type=code&client_id=113b2c4aa149e87ed0b39dc8c8cc0cc2&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fredirect&username=nikkhvat`
+GET `http://localhost:3000/api/auth/authorize?response_type=code&client_id=cbb8051f-3897-42e3-b909-f8f56e7941a9&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fredirect&username=nikkhvat`
 
 ( тут вместо того что бы передать username нужно сделать страничку на которой будет спрашиваться разрешение у пользователя можно ли взять его данные, и из jwt токена достовать уже данные пользователя, я сделал это для упрощения )
 
-Получаем редирект на url который указали с кодом 73f3536f2303d09ff490b9c8e678ab82
+Получаем редирект на url с кодом
+
+(`http://localhost:3001/redirect?code=d11947ae-eaa5-44ea-8618-13c858a34409`)
 
 4. Получаем токен по секретному коду по которому можно будет достать информацию о пользователе
 
@@ -63,17 +65,17 @@ POST `http://localhost:3000/api/token`
 
 ```json
 {
-  "code": "73f3536f2303d09ff490b9c8e678ab82",
-  "client_id": "104636c2e3f6f5b47979d283f864c743",
-  "client_secret": "481a692f4d39c430508b18e1c67a43ef9df07ad42a9100cc0e064f2e250493c4",
+  "code": "d11947ae-eaa5-44ea-8618-13c858a34409",
+  "client_id": "cbb8051f-3897-42e3-b909-f8f56e7941a9",
+  "client_secret": "6b7bdd89-9b24-4d2c-b422-4507ae84fd87"
 }
 ```
 
-Получаем токен доступа
+Получаем токен доступа (jwt)
 
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoibmlra2h2YXQiLCJpYXQiOjE3MDYxMTA0MjEsImV4cCI6MTcwNjExNDAyMX0.Teb5Zi-J4g7jSXuja1teyZMWlviExSqrA8JyO1AVgBs"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjgsInVzZXJuYW1lIjoibmlra2h2YXQiLCJpYXQiOjE3MDYxMTc3NTMsImV4cCI6MTcwNjEyMTM1M30.XpmTYK4f0HKUXnQT-_1sZOcVKgPXFrSfWU5loTHwKXs"
 }
 ```
 
@@ -87,6 +89,6 @@ GET `http://localhost:3000/api/user/userinfo`
 ```json
 {
   "username": "nikkhvat",
-  "id": 1
+  "id": 8
 }
 ```

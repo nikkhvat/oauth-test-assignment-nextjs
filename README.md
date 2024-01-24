@@ -1,40 +1,92 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Тестовое задание простого oauth сервера
 
-## Getting Started
+## Запуск
 
-First, run the development server:
-
-```bash
+```sh
+npm i 
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Пример использывания 
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+1. Cоздаём пользователя через postman 
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+POST `http://localhost:3000/api/auth/register`
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```json
+{
+  "username": "nikkhvat", 
+  "password": "sdfeorefjiguhrewdqo"
+}
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Ответ:
 
-## Learn More
+```json
+{
+  "message": "User created",
+  "userId": 1
+}
+```
 
-To learn more about Next.js, take a look at the following resources:
+2. Создаём клиента 
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+POST `http://localhost:3000/api/client/register`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```json
+{
+  "name": "clientName",
+  "redirectUris": ["localhost:3001/redirect"]
+}
+```
 
-## Deploy on Vercel
+Ответ:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```json
+{
+    "clientId": "104636c2e3f6f5b47979d283f864c743",
+    "clientSecret": "481a692f4d39c430508b18e1c67a43ef9df07ad42a9100cc0e064f2e250493c4"
+}
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+3. Переходим на authorize
+
+GET `http://localhost:3000/api/auth/authorize?response_type=code&client_id=113b2c4aa149e87ed0b39dc8c8cc0cc2&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fredirect&username=nikkhvat`
+
+( тут вместо того что бы передать username нужно сделать страничку на которой будет спрашиваться разрешение у пользователя можно ли взять его данные, и из jwt токена достовать уже данные пользователя, я сделал это для упрощения )
+
+Получаем редирект на url который указали с кодом 73f3536f2303d09ff490b9c8e678ab82
+
+4. Получаем токен по секретному коду по которому можно будет достать информацию о пользователе
+
+POST `http://localhost:3000/api/token`
+
+```json
+{
+  "code": "73f3536f2303d09ff490b9c8e678ab82",
+  "client_id": "104636c2e3f6f5b47979d283f864c743",
+  "client_secret": "481a692f4d39c430508b18e1c67a43ef9df07ad42a9100cc0e064f2e250493c4",
+}
+```
+
+Получаем токен доступа
+
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoibmlra2h2YXQiLCJpYXQiOjE3MDYxMTA0MjEsImV4cCI6MTcwNjExNDAyMX0.Teb5Zi-J4g7jSXuja1teyZMWlviExSqrA8JyO1AVgBs"
+}
+```
+
+5. Получам данные пользователя по токену который нам вернул сервер 
+
+GET `http://localhost:3000/api/user/userinfo`
+в заголовок authorization передаём токен `Bearer ${token}`
+
+Получаем в ответ данные пользователя
+
+```json
+{
+  "username": "nikkhvat",
+  "id": 1
+}
+```

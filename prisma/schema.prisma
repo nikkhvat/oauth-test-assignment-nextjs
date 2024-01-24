@@ -37,7 +37,8 @@ model AccessToken {
 
 model Client {
   id           Int    @id @default(autoincrement())
-  clientId     String @unique
-  clientSecret String
+  name         String @default("")
+  clientId     String @unique @default(uuid())
+  clientSecret String @default(uuid())
   redirectUris String[]
 }

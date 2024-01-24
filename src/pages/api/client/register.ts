@@ -20,21 +20,16 @@ export default async function handler(
 
   const { name, redirectUris } = req.body;
 
-  console.log(`reg client ${name}, ${redirectUris.join("|")}`);
-
-  const clientId = randomBytes(16).toString("hex");
-  const clientSecret = randomBytes(32).toString("hex");
-
   try {
     clientSchema.parse({ name, redirectUris });
 
     const client = await prisma.client.create({
       data: {
-        clientId,
-        clientSecret,
+        name,
         redirectUris,
       },
     });
+
     res.status(201).json({
       clientId: client.clientId,
       clientSecret: client.clientSecret,

@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { randomBytes } from "crypto";
 
 import { z } from "zod";
 
@@ -45,13 +44,9 @@ export default async function handler(
     return res.status(400).json({ error: 'Incorrect client_id' });
   }
 
-  const code = randomBytes(16).toString('hex');
-
   try {
-
     const authCode = await prisma.authCode.create({
       data: {
-        code,
         userId: user?.id,
         expiry: new Date(Date.now() + 30 * 60 * 1000),
         redirectUri: redirect_uri as string,

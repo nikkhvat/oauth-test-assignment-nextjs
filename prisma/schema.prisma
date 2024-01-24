@@ -20,7 +20,7 @@ model User {
 
 model AuthCode {
   id         Int      @id @default(autoincrement())
-  code       String   @unique
+  code       String   @unique @default(uuid())
   userId     Int
   user       User     @relation(fields: [userId], references: [id])
   expiry     DateTime

@@ -1,7 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { randomBytes } from "crypto";
 
+import { z } from "zod";
+
 import prisma from "@/data/prisma/instance";
+
+const querySchema = z.object({
+  response_type: z.string(),
+  client_id: z.string(),
+  redirect_uri: z.string(),
+  username: z.string(),
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,8 +19,16 @@ export default async function handler(
   if (req.method !== "GET") {
     return res.status(405).end();
   }
-
   const { response_type, client_id, redirect_uri, username } = req.query;
+
+  try {
+    querySchema.parse({ response_type, client_id, redirect_uri, username })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const validationErrors = error.format();
+      return res.status(400).json({ error: "Validation error", validationErrors });
+    }
+  }
 
   const user = await prisma.user.findUnique({ where: { username: username as string } });
 
@@ -31,6 +48,7 @@ export default async function handler(
   const code = randomBytes(16).toString('hex');
 
   try {
+
     const authCode = await prisma.authCode.create({
       data: {
         code,
@@ -45,6 +63,12 @@ export default async function handler(
 
     res.redirect(redirectUrl.toString());
   } catch (error) {
+
+    if (error instanceof z.ZodError) {
+      const validationErrors = error.format();
+      return res.status(400).json({ error: "Validation error", validationErrors });
+    }
+
     res.status(500).json({ error: 'Error creating authorization code' });
   }
 }

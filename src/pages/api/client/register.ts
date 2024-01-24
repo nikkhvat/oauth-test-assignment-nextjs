@@ -1,7 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { randomBytes } from "crypto";
 
+import { z } from "zod";
+
 import prisma from "@/data/prisma/instance";
+
+const clientSchema = z.object({
+  name: z.string().min(6).max(255),
+  redirectUris: z.array(z.string()),
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -19,6 +26,8 @@ export default async function handler(
   const clientSecret = randomBytes(32).toString("hex");
 
   try {
+    clientSchema.parse({ name, redirectUris });
+
     const client = await prisma.client.create({
       data: {
         clientId,
@@ -31,6 +40,11 @@ export default async function handler(
       clientSecret: client.clientSecret,
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      const validationErrors = error.format();
+      return res.status(400).json({ error: "Validation error", validationErrors });
+    }
+
     res.status(500).json({ error: "Client registration error" });
   }
 }

@@ -1,8 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
 
 import prisma from "@/data/prisma/instance";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+
+const userSchema = z.object({
+  username: z.string().min(5),
+  password: z.string().min(8),
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,6 +24,8 @@ export default async function handler(
   }
 
   try {
+    userSchema.parse({ username, password });
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: { username, password: hashedPassword },
@@ -31,6 +39,11 @@ export default async function handler(
       }
     }
 
+    if (error instanceof z.ZodError) {
+      const validationErrors = error.format();
+      return res.status(400).json({ error: "Validation error", validationErrors });
+    }
+    
     res.status(500).json({ error: "Error creating user" });
   }
 }

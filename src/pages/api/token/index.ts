@@ -1,9 +1,17 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
 
+import { z } from "zod";
+
 import prisma from "@/data/prisma/instance";
 
 const JWT_SECRET = process.env.JWT_SECRET || '';
+
+const tokenSchema = z.object({
+  code: z.string(), 
+  client_id: z.string(), 
+  client_secret: z.string()
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,6 +22,15 @@ export default async function handler(
   }
 
   const { code, client_id, client_secret } = req.body;
+
+  try {
+    tokenSchema.parse({ code, client_id, client_secret })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const validationErrors = error.format();
+      return res.status(400).json({ error: "Validation error", validationErrors });
+    }
+  }
 
   console.log(code, client_id, client_secret);
 

@@ -41,6 +41,7 @@ export default async function handler(
 
   const client = await prisma.client.findUnique({ where: { clientId: client_id as string } });
   if (!client) {
+    
     return res.status(400).json({ error: 'Incorrect client_id' });
   }
 
